@@ -183,7 +183,7 @@
                 document.getElementById("preview-content").innerHTML = "";
             } catch (error) {
                 console.error("Error submitting bug report:", error);
-                showPopup("Failed to submit bug report. Please try again.", "OK");
+                showPopup("Bug reporting servers are temporarily down. Please try again later.", "OK");
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = "Submit Bug Report";
