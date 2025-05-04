@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ban IP Address</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #1a0d2e, #4a0072);
+            color: #fff;
+        }
+        .container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box: 0 0 20px #ff00ff;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            margin: 10px;
+            width: 200px;
+            background: #333;
+            color: #fff;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #ff00ff;
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background: #00ffff;
+            transform: scale(1.05);
+        }
+        #status-log {
+            font-size: 16px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #111;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 20px auto;
+            width: 80%;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ban IP Address</h1>
+        <input type="text" id="ip-input" placeholder="Enter IP (e.g., 192.168.1.1)">
+        <button onclick="banIPAddress()">Ban IP</button>
+        <div id="status-log"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAR5ZNjlqMDSu6nTLEYrTQZrFhSODply8s",
+            authDomain: "flgcas.firebaseapp.com",
+            projectId: "flgcas",
+            storageBucket: "flgcas.firebasestorage.app",
+            messagingSenderId: "756441459947",
+            appId: "1:756441459947:web:82e6aaa245c5cea95ae2ae",
+            measurementId: "G-WT7712F2DP"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        function addStatusLog(message) {
+            const log = document.getElementById("status-log");
+            const timestamp = new Date().toISOString().split("T")[1].split(".")[0];
+            log.innerHTML += `<p>[${timestamp}] ${message}</p>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        window.banIPAddress = async function() {
+            const ipInput = document.getElementById("ip-input").value.trim();
+            if (!ipInput) {
+                addStatusLog("Error: Please enter an IP address.");
+                return;
+            }
+
+            // Basic IP validation (simple regex for IPv4)
+            const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+            if (!ipRegex.test(ipInput)) {
+                addStatusLog("Error: Invalid IP address format.");
+                return;
+            }
+
+            try {
+                addStatusLog(`Banning IP ${ipInput}...`);
+                const ipDoc = doc(db, "banned_ips", ipInput);
+                await setDoc(ipDoc, {
+                    reason: "Manually banned via admin tool",
+                    banned_at: new Date().toISOString()
+                });
+                addStatusLog(`Successfully banned IP ${ipInput}.`);
+                document.getElementById("ip-input").value = ""; // Clear input
+            } catch (error) {
+                addStatusLog(`Error banning IP: ${error.message}`);
+                console.error("Error banning IP:", error);
+            }
+        };
+    </script>
+</body>
+</html>
